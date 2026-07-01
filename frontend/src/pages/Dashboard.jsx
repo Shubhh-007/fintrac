@@ -1,32 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
+import { AuthContext } from '../context/AuthContext';
 
+/**
+ * Dashboard Component (User View)
+ * Personal expense tracking dashboard for regular users
+ * - Net balance, income, expenses, savings rate
+ * - Monthly income vs expenses chart
+ * - Category-wise expense breakdown
+ * - Recent transactions list
+ * 
+ * Admin users are redirected to AdminDashboard via ProtectedRoute
+ */
 function Dashboard() {
+  const { user } = useContext(AuthContext);
+  
   const [data, setData] = useState([]);
   const [stats, setStats] = useState({ balance: 0, income: 0, expenses: 0, savingsRate: 0 });
   const [pieData, setPieData] = useState([]);
   const [barData, setBarData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchTransactions();
+    fetchUserData();
   }, []);
 
-  const fetchTransactions = async () => {
+  const fetchUserData = async () => {
     try {
-      const res = await axios.get('/transactions');
+      setLoading(true);
+      setError('');
+      const res = await axios.get('/expenses');
       const tx = res.data;
       setData(tx);
 
-      let inc = 0; let exp = 0;
+      let inc = 0;
+      let exp = 0;
       const cats = {};
       const monthly = {};
 
       tx.forEach(t => {
         if (t.type === 'income') inc += t.amount;
-        if (t.type === 'expense') {
+        else {
           exp += t.amount;
           cats[t.category] = (cats[t.category] || 0) + t.amount;
         }
@@ -38,7 +56,12 @@ function Dashboard() {
         else monthly[monthYear].Expense += t.amount;
       });
 
-      setStats({ balance: inc - exp, income: inc, expenses: exp, savingsRate: inc ? Math.round(((inc - exp) / inc) * 100) : 0 });
+      setStats({ 
+        balance: inc - exp, 
+        income: inc, 
+        expenses: exp, 
+        savingsRate: inc ? Math.round(((inc - exp) / inc) * 100) : 0 
+      });
 
       // Pie data
       const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -49,64 +72,81 @@ function Dashboard() {
       })).sort((a,b)=>b.value-a.value);
       setPieData(pData);
 
-      // Bar data (sort by typical month order)
+      // Bar data
       const bData = Object.values(monthly);
       setBarData(bData);
 
     } catch (err) {
       console.error(err);
+      setError('Failed to load user expenses');
+    } finally {
+      setLoading(false);
     }
   };
-
-  const recentTx = data.slice(0, 5);
 
   const formatCurrency = (val) => '₹' + val.toLocaleString('en-IN');
 
   const getIcon = (cat) => {
-    const icons = { 'Food': '🍔', 'Travel': '✈️', 'Bills': '⚡', 'Shopping': '🛒', 'Income': '💼', 'Health': '💊', 'Entertainment': '🎮' };
+    const icons = { 
+      'Food': '🍔', 
+      'Travel': '✈️', 
+      'Bills': '⚡', 
+      'Shopping': '🛒', 
+      'Income': '💼', 
+      'Health': '💊', 
+      'Entertainment': '🎮' 
+    };
     return icons[cat] || '💰';
   };
+
+  if (loading) {
+    return <div style={{display:'flex',height:'80vh',alignItems:'center',justifyContent:'center',color:'var(--muted)'}}>Loading Dashboard...</div>;
+  }
+
+  const recentTx = data.slice(0, 5);
 
   return (
     <div className="screen" style={{ padding: '22px' }}>
       <div className="topbar">
         <div>
-          <div className="page-title">Dashboard</div>
-          <div className="page-sub">Overview</div>
+          <div className="page-title">Welcome, {user?.name?.split(' ')[0] || 'User'} 👋</div>
+          <div className="page-sub">Manage your personal expenses efficiently.</div>
         </div>
         <div className="topbar-right">
           <Link to="/transactions" className="btn btn-primary" style={{ textDecoration: 'none' }}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
-            Add transaction
+            Add expense
           </Link>
         </div>
       </div>
 
+      {error && <div style={{ color: 'var(--danger)', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
+
       <div className="stats-grid">
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="stat-label">Total balance</div>
+            <div className="stat-label">Net Balance</div>
             <div className="stat-icon si-blue"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" strokeWidth="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
           </div>
           <div className="stat-value">{formatCurrency(stats.balance)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="stat-label">Total income</div>
+            <div className="stat-label">Total Income</div>
             <div className="stat-icon si-green"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#10b981" strokeWidth="2"><path d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg></div>
           </div>
           <div className="stat-value" style={{ color: 'var(--success)' }}>{formatCurrency(stats.income)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="stat-label">Total expenses</div>
+            <div className="stat-label">Total Expenses</div>
             <div className="stat-icon si-red"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ef4444" strokeWidth="2"><path d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg></div>
           </div>
           <div className="stat-value" style={{ color: 'var(--danger)' }}>{formatCurrency(stats.expenses)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="stat-label">Savings rate</div>
+            <div className="stat-label">Savings Rate</div>
             <div className="stat-icon si-amber"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" strokeWidth="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
           </div>
           <div className="stat-value">{stats.savingsRate}%</div>
@@ -115,7 +155,7 @@ function Dashboard() {
 
       <div className="charts-row">
         <div className="card">
-          <div className="card-title">Income vs expenses</div>
+          <div className="card-title">Income vs Expenses</div>
           <div className="card-sub">Monthly breakdown</div>
           <div style={{ height: '180px', marginTop: '20px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -134,7 +174,7 @@ function Dashboard() {
         </div>
         
         <div className="card">
-          <div className="card-title">Expense breakdown</div>
+          <div className="card-title">Expense Breakdown</div>
           <div className="card-sub">By Category</div>
           <div className="pie-wrap" style={{ marginTop: '10px' }}>
             {pieData.length === 0 ? (
@@ -168,7 +208,7 @@ function Dashboard() {
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div>
-            <div className="card-title">Recent transactions</div>
+            <div className="card-title">Recent Expenses</div>
             <div className="card-sub" style={{ marginBottom: 0 }}>Last 5 entries</div>
           </div>
           <Link to="/transactions" className="btn" style={{ fontSize: '12px', textDecoration: 'none' }}>View all</Link>
@@ -178,7 +218,7 @@ function Dashboard() {
           {recentTx.map(tx => (
             <div className="tx-item" key={tx._id}>
               <div className="tx-icon" style={{ background: '#fef3c7', fontSize: '18px' }}>{getIcon(tx.category)}</div>
-              <div className="tx-info"><div className="tx-name">{tx.description}</div><div className="tx-cat">{tx.category}</div></div>
+              <div className="tx-info"><div className="tx-name" style={{color:'#000'}}>{tx.title}</div><div className="tx-cat">{tx.category}</div></div>
               <div>
                 <div className={`tx-amount ${tx.type === 'income' ? 'up' : 'down'}`}>
                   {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}

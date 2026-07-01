@@ -6,12 +6,12 @@ function Analytics() {
   const [categoryData, setCategoryData] = useState([]);
 
   useEffect(() => {
-    fetchTransactions();
+    fetchExpenses();
   }, []);
 
-  const fetchTransactions = async () => {
+  const fetchExpenses = async () => {
     try {
-      const res = await axios.get('/transactions');
+      const res = await axios.get('/expenses');
       const tx = res.data;
       setData(tx);
 
@@ -59,8 +59,8 @@ function Analytics() {
           {categoryData.map((c, i) => (
             <div key={c.name}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '4px' }}>
-                <span>{getIcon(c.name)} {c.name}</span>
-                <span style={{ fontWeight: '500' }}>₹{c.amount.toLocaleString('en-IN')} · {c.pct}%</span>
+                <span style={{color: '#000'}}>{getIcon(c.name)} {c.name}</span>
+                <span style={{ fontWeight: '500', color: '#000' }}>₹{c.amount.toLocaleString('en-IN')} · {c.pct}%</span>
               </div>
               <div style={{ height: '7px', background: 'var(--bg)', borderRadius: '4px' }}>
                 <div style={{ height: '100%', width: `${c.pct}%`, background: getColor(i), borderRadius: '4px' }}></div>

@@ -1,22 +1,33 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  let mongoUri = process.env.MONGODB_URI;
+
   try {
-    let mongoUri = process.env.MONGODB_URI;
-
-    // Use in-memory DB if standard local connection is used
-    if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
-      const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongod = await MongoMemoryServer.create();
-      mongoUri = mongod.getUri();
-      console.log('Using in-memory MongoDB server for testing out-of-the-box.');
-    }
-
-    const conn = await mongoose.connect(mongoUri);
+    console.log('Connecting to primary MongoDB...');
+    const conn = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 3000,
+      connectTimeoutMS: 3000,
+      socketTimeoutMS: 3000,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+    console.error(`Primary database connection failed: ${error.message}`);
+    
+    // Fallback to local MongoDB
+    const fallbackUri = 'mongodb://127.0.0.1:27017/expense_tracker';
+    console.log(`Attempting fallback database connection to ${fallbackUri}...`);
+    try {
+      const conn = await mongoose.connect(fallbackUri, {
+        serverSelectionTimeoutMS: 2000,
+        connectTimeoutMS: 2000,
+      });
+      console.log(`MongoDB Connected (Fallback): ${conn.connection.host}`);
+    } catch (fallbackError) {
+      console.error(`Fallback database connection failed: ${fallbackError.message}`);
+      console.warn('⚠️ Server will run without a database connection. Database features will be unavailable.');
+      // Do NOT exit process, so server remains online for UI inspection
+    }
   }
 };
 
