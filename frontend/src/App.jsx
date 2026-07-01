@@ -9,6 +9,8 @@ import Auth from './pages/Auth';
 import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
+import FamilyMembers from './pages/FamilyMembers';
+import Invitations from './pages/Invitations';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 /**
@@ -17,7 +19,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
  * Route Structure:
  * - Public routes: /auth, /select, /login, /signup
  * - Protected User routes: /dashboard, /transactions, /analytics, /profile
- * - Protected Admin routes: /admin/dashboard
+ * - Protected Admin routes: /admin/dashboard, /admin/family, /admin/invitations
  * 
  * Role-based redirects:
  * - After login: admin → /admin/dashboard, user → /dashboard
@@ -35,7 +37,7 @@ function App() {
 
   // Redirect unauthenticated users to login
   if (!user && !publicPaths.includes(location.pathname)) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/select" />;
   }
 
   // Redirect authenticated users away from auth pages to their dashboard
@@ -79,6 +81,14 @@ function App() {
           <Route 
             path="/admin/dashboard" 
             element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" />} 
+          />
+          <Route 
+            path="/admin/family" 
+            element={<ProtectedRoute element={<FamilyMembers />} requiredRole="admin" />} 
+          />
+          <Route 
+            path="/admin/invitations" 
+            element={<ProtectedRoute element={<Invitations />} requiredRole="admin" />} 
           />
 
           {/* Catch-all - Redirect to home */}

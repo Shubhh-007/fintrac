@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 /**
  * FamilyCard Component
@@ -8,16 +9,31 @@ import { Link } from 'react-router-dom';
  */
 function FamilyCard() {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [members, setMembers] = useState([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with real data from context/API
-  const familyMembers = [
-    { id: 1, name: 'You', role: 'Parent', status: 'Active', avatar: '👨' },
-    { id: 2, name: 'Mom', role: 'Spouse', status: 'Active', avatar: '👩' },
-    { id: 3, name: 'Rahul', role: 'Child', status: 'Active', avatar: '👦' },
-    { id: 4, name: 'Neha', role: 'Child', status: 'Active', avatar: '👧' }
-  ];
+  useEffect(() => {
+    const fetchFamilyCardData = async () => {
+      try {
+        setLoading(true);
+        const [membersRes, invitesRes] = await Promise.all([
+          axios.get('/users/family'),
+          axios.get('/users/invitations')
+        ]);
+        setMembers(membersRes.data || []);
+        setPendingCount((invitesRes.data || []).filter(i => i.status === 'sent').length);
+      } catch (err) {
+        console.error('Failed to load sidebar family info:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const totalMembers = familyMembers.length;
+    fetchFamilyCardData();
+  }, []);
+
+  const totalMembers = members.length;
 
   return (
     <div style={{
@@ -59,32 +75,41 @@ function FamilyCard() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-            {familyMembers.map(member => (
-              <div key={member.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '13px',
-                background: 'rgba(255,255,255,0.15)',
-                padding: '8px 12px',
-                borderRadius: '8px'
-              }}>
-                <span style={{ fontSize: '18px' }}>{member.avatar}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '500' }}>{member.name}</div>
-                  <div style={{ fontSize: '11px', opacity: 0.8 }}>{member.role}</div>
-                </div>
-                <span style={{
-                  fontSize: '10px',
-                  background: 'rgba(255,255,255,0.3)',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  fontWeight: '500'
+            {loading ? (
+              <div style={{ fontSize: '12px', opacity: 0.8 }}>Loading...</div>
+            ) : members.length === 0 ? (
+              <div style={{ fontSize: '12px', opacity: 0.8 }}>No members yet</div>
+            ) : (
+              members.map(member => (
+                <div key={member._id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '13px',
+                  background: 'rgba(255,255,255,0.15)',
+                  padding: '8px 12px',
+                  borderRadius: '8px'
                 }}>
-                  {member.status}
-                </span>
-              </div>
-            ))}
+                  <span style={{ fontSize: '18px' }}>
+                    {member.relationship === 'admin' ? '👨' : member.relationship === 'spouse' ? '👩' : '👦'}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '500' }}>{member.name}</div>
+                    <div style={{ fontSize: '11px', opacity: 0.8, textTransform: 'capitalize' }}>{member.relationship}</div>
+                  </div>
+                  <span style={{
+                    fontSize: '10px',
+                    background: 'rgba(255,255,255,0.3)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontWeight: '500',
+                    textTransform: 'capitalize'
+                  }}>
+                    {member.status}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
 
           <div style={{
@@ -108,7 +133,7 @@ function FamilyCard() {
               borderRadius: '8px',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '20px', fontWeight: '800' }}>2</div>
+              <div style={{ fontSize: '20px', fontWeight: '800' }}>{pendingCount}</div>
               <div style={{ fontSize: '11px', opacity: 0.9 }}>Pending</div>
             </div>
           </div>
@@ -142,3 +167,4 @@ function FamilyCard() {
 }
 
 export default FamilyCard;
+

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
 
 function Auth() {
   const location = useLocation();
@@ -13,6 +14,8 @@ function Auth() {
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [adminSecret, setAdminSecret] = useState('');
+  const [inviteCode, setInviteCode] = useState(searchParams.get('code') || '');
+  const [invitationDetails, setInvitationDetails] = useState(null);
   const [role, setRole] = useState(searchParams.get('role') === 'admin' ? 'admin' : 'user');
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(location.pathname === '/login');
@@ -21,7 +24,30 @@ function Auth() {
     const currentMode = location.pathname === '/login' ? 'login' : location.pathname === '/signup' ? 'signup' : 'landing';
     setIsLogin(currentMode === 'login');
     setRole(searchParams.get('role') === 'admin' ? 'admin' : 'user');
+    
+    const code = searchParams.get('code');
+    if (code) {
+      setInviteCode(code);
+      verifyInviteCode(code);
+    }
   }, [location.pathname, searchParams]);
+
+  const verifyInviteCode = async (code) => {
+    if (!code) return;
+    try {
+      const res = await axios.get(`/users/invitations/${code}`);
+      setInvitationDetails(res.data);
+      if (res.data.inviteeEmail) {
+        setEmail(res.data.inviteeEmail);
+      }
+      if (res.data.inviteeName) {
+        setName(res.data.inviteeName);
+      }
+    } catch (err) {
+      console.error('Failed to verify invite code:', err);
+      setInvitationDetails(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +62,7 @@ function Auth() {
       if (isLogin) {
         await login(email, password, role);
       } else {
-        await register(name, email, password, role, adminSecret);
+        await register(name, email, password, role, adminSecret, inviteCode);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
@@ -50,71 +76,14 @@ function Auth() {
     } else {
       params.set('role', 'user');
     }
+    if (inviteCode) {
+      params.set('code', inviteCode);
+    }
     navigate(`/${mode}?${params.toString()}`);
   };
 
   if (location.pathname === '/auth') {
-    return (
-      <div className="landing-shell">
-        <section className="hero-section">
-          <div className="hero-copy">
-            <div className="eyebrow">Secure family finance management</div>
-            <h1>Family Expense Tracker</h1>
-            <p>Manage your family's finances securely with role-based access. Parents can monitor overall spending, while family members manage their own expenses within one polished experience.</p>
-            <div className="hero-actions">
-              <button className="btn btn-primary" onClick={() => navigate('/select')}>Get Started</button>
-              <button className="btn btn-secondary" onClick={() => navigate('/select')}>Login</button>
-            </div>
-            <div className="hero-pills">
-              <span>JWT auth</span>
-              <span>Protected routes</span>
-              <span>Modern dashboard</span>
-            </div>
-          </div>
-          <div className="hero-panel">
-            <div className="panel-card">
-              <div className="panel-title">Choose your access</div>
-              <div className="panel-actions">
-                <button className="access-card" onClick={() => navigate('/select')}>
-                  <strong>User access</strong>
-                  <span>Personal expense tracking</span>
-                </button>
-                <button className="access-card" onClick={() => navigate('/select')}>
-                  <strong>Admin access</strong>
-                  <span>Family-wide oversight</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="feature-grid">
-          <article className="feature-card">
-            <h3>Secure authentication</h3>
-            <p>Protected sessions, encrypted password handling, and role-aware navigation.</p>
-          </article>
-          <article className="feature-card">
-            <h3>Expense management</h3>
-            <p>Create, edit, and review expenses with clear dashboards and summaries.</p>
-          </article>
-          <article className="feature-card">
-            <h3>RBAC for families</h3>
-            <p>Admins oversee the household while members manage only their own records.</p>
-          </article>
-        </section>
-
-        <section className="why-section">
-          <h2>Why this experience stands out</h2>
-          <ul>
-            <li>Secure and scalable architecture</li>
-            <li>Fast and responsive interface</li>
-            <li>Clean, modern UI for recruiters and users alike</li>
-          </ul>
-        </section>
-
-        <footer className="landing-footer">Secure • Scalable • Family Friendly</footer>
-      </div>
-    );
+    return <Navigate to="/select" replace />;
   }
 
   if (location.pathname === '/select') {
@@ -183,6 +152,21 @@ function Auth() {
         <div className="auth-title">{isLogin ? (role === 'admin' ? 'Admin Login' : 'User Login') : (role === 'admin' ? 'Admin Signup' : 'User Signup')}</div>
         <div className="auth-sub">{isLogin ? `Sign in to access your dashboard` : 'Create your account to start tracking'}</div>
 
+        {!isLogin && role === 'user' && invitationDetails && (
+          <div style={{
+            background: '#ecfdf5',
+            border: '1px solid #a7f3d0',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            fontSize: '13px',
+            color: '#065f46',
+            lineHeight: '1.4'
+          }}>
+            🎉 Joining <strong>{invitationDetails.adminName}</strong>'s family as a <strong>{invitationDetails.relationship}</strong>!
+          </div>
+        )}
+
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <span className="auth-link" style={{ fontSize: '13px' }} onClick={() => navigate('/select')}>← Choose different portal</span>
         </div>
@@ -210,12 +194,8 @@ function Auth() {
                 <label className="form-label">Confirm Password</label>
                 <input type="password" required className="form-input" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
-              {role === 'admin' && (
-                <div className="form-group">
-                  <label className="form-label">Admin Secret Key</label>
-                  <input type="password" required className="form-input" placeholder="Enter Admin Secret" value={adminSecret} onChange={(e) => setAdminSecret(e.target.value)} />
-                </div>
-              )}
+
+
             </>
           )}
           <button type="submit" className="auth-btn" style={{ background: role === 'admin' ? '#2563eb' : '#10b981' }}>{isLogin ? 'Sign in' : 'Create account'}</button>

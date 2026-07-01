@@ -25,9 +25,41 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Pending family invitation state
+  const [pendingInvite, setPendingInvite] = useState(null);
+  const [inviteMsg, setInviteMsg] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   useEffect(() => {
     fetchUserData();
+    // Only check for invites if user is not already in a family
+    if (!user?.familyId) fetchMyInvitation();
   }, []);
+
+  const fetchMyInvitation = async () => {
+    try {
+      const res = await axios.get('/users/my-invitation');
+      setPendingInvite(res.data); // null if none
+    } catch (err) {
+      // silently ignore
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    if (!pendingInvite) return;
+    setInviteLoading(true);
+    try {
+      const res = await axios.post('/users/accept-invitation', { inviteCode: pendingInvite.inviteCode });
+      setInviteMsg(res.data.message);
+      setPendingInvite(null);
+      // Reload after 1.5s so sidebar/family data refreshes
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      setInviteMsg(err.response?.data?.message || 'Failed to accept invitation');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -121,6 +153,71 @@ function Dashboard() {
       </div>
 
       {error && <div style={{ color: 'var(--danger)', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
+
+      {/* Pending Family Invitation Banner */}
+      {pendingInvite && !inviteMsg && (
+        <div style={{
+          background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+          border: '1px solid #6ee7b7',
+          borderRadius: '14px',
+          padding: '18px 22px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '32px' }}>🏠</span>
+            <div>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#065f46' }}>
+                Family Invitation from {pendingInvite.adminName}
+              </div>
+              <div style={{ fontSize: '13px', color: '#047857', marginTop: '3px' }}>
+                You've been invited to join as <strong style={{ textTransform: 'capitalize' }}>{pendingInvite.relationship}</strong>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleAcceptInvite}
+              disabled={inviteLoading}
+              style={{
+                padding: '9px 22px',
+                background: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '13px',
+                cursor: inviteLoading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {inviteLoading ? 'Accepting...' : '✅ Accept & Join Family'}
+            </button>
+            <button
+              onClick={() => setPendingInvite(null)}
+              style={{
+                padding: '9px 16px',
+                background: 'white',
+                color: '#64748b',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+      {inviteMsg && (
+        <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '10px', padding: '14px 18px', marginBottom: '16px', color: '#065f46', fontWeight: '600', fontSize: '14px' }}>
+          🎉 {inviteMsg}
+        </div>
+      )}
 
       <div className="stats-grid">
         <div className="stat-card">

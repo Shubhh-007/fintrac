@@ -6,9 +6,9 @@ const connectDB = async () => {
   try {
     console.log('Connecting to primary MongoDB...');
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 3000,
-      connectTimeoutMS: 3000,
-      socketTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      family: 4  // Use IPv4, skip IPv6
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
@@ -19,14 +19,12 @@ const connectDB = async () => {
     console.log(`Attempting fallback database connection to ${fallbackUri}...`);
     try {
       const conn = await mongoose.connect(fallbackUri, {
-        serverSelectionTimeoutMS: 2000,
-        connectTimeoutMS: 2000,
+        serverSelectionTimeoutMS: 5000,
       });
       console.log(`MongoDB Connected (Fallback): ${conn.connection.host}`);
     } catch (fallbackError) {
       console.error(`Fallback database connection failed: ${fallbackError.message}`);
       console.warn('⚠️ Server will run without a database connection. Database features will be unavailable.');
-      // Do NOT exit process, so server remains online for UI inspection
     }
   }
 };

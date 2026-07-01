@@ -100,7 +100,7 @@ const getMemberExpenses = async (req, res, next) => {
 
     // Verify the member belongs to this admin
     const member = await User.findById(memberId);
-    if (!member || (member.familyId.toString() !== req.user._id.toString() && memberId !== req.user._id.toString())) {
+    if (!member || (member._id.toString() !== req.user._id.toString() && (!member.familyId || member.familyId.toString() !== req.user._id.toString()))) {
       return next(new AppError('Unauthorized access to member expenses', 403));
     }
 
@@ -211,6 +211,71 @@ const getInvitationDetails = async (req, res, next) => {
   }
 };
 
+// Get invitation sent to current logged-in user's email (for user dashboard)
+const getMyInvitation = async (req, res, next) => {
+  try {
+    const invitation = await Invitation.findOne({
+      inviteeEmail: req.user.email,
+      status: 'sent'
+    }).populate('admin', 'name email');
+
+    if (!invitation) {
+      return res.status(200).json(null);
+    }
+
+    res.status(200).json({
+      inviteCode: invitation.inviteCode,
+      adminName: invitation.admin.name,
+      relationship: invitation.relationship,
+      expiresAt: invitation.expiresAt
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Accept a family invitation (logged-in user accepts their invite)
+const acceptInvitation = async (req, res, next) => {
+  try {
+    const { inviteCode } = req.body;
+
+    const invitation = await Invitation.findOne({
+      inviteCode,
+      inviteeEmail: req.user.email,
+      status: 'sent'
+    }).populate('admin', 'name email');
+
+    if (!invitation) {
+      return next(new AppError('Invalid or already used invite code', 400));
+    }
+
+    if (new Date() > invitation.expiresAt) {
+      return next(new AppError('This invitation has expired', 400));
+    }
+
+    // Link the user to the admin's family
+    await User.findByIdAndUpdate(req.user._id, {
+      familyId: invitation.admin._id,
+      invitedBy: invitation.admin._id,
+      relationship: invitation.relationship,
+      status: 'active',
+      familyJoinDate: new Date()
+    });
+
+    // Mark invitation as accepted
+    invitation.status = 'accepted';
+    invitation.acceptedBy = req.user._id;
+    await invitation.save();
+
+    res.status(200).json({
+      success: true,
+      message: `You have joined ${invitation.admin.name}'s family as ${invitation.relationship}!`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserStats,
@@ -218,5 +283,7 @@ module.exports = {
   getMemberExpenses,
   sendInvitation,
   getPendingInvitations,
-  getInvitationDetails
+  getInvitationDetails,
+  getMyInvitation,
+  acceptInvitation
 };

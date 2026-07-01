@@ -115,8 +115,8 @@ export const AuthProvider = ({ children }) => {
    * Register new user and set authentication token
    * Note: Automatic redirect to role-based dashboard happens in App.jsx
    */
-  const register = async (name, email, password, role = 'user', adminSecret = '') => {
-    const res = await axios.post('/auth/register', { name, email, password, role, adminSecret });
+  const register = async (name, email, password, role = 'user', adminSecret = '', inviteCode = '') => {
+    const res = await axios.post('/auth/register', { name, email, password, role, adminSecret, inviteCode });
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
     setUser(userData);

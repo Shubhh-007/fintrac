@@ -58,9 +58,11 @@ function Sidebar() {
       <div className="sidebar-bottom">
         <NavLink to="/profile" style={{textDecoration:'none'}}>
           <div className="user-pill">
-            <div className="avatar">{user?.firstName ? user.firstName.charAt(0) : 'U'}{user?.lastName ? user.lastName.charAt(0) : ''}</div>
+            <div className="avatar">
+              {user?.name ? user.name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() : 'U'}
+            </div>
             <div className="user-info">
-              <div className="user-name">{user?.firstName || 'User'} {user?.lastName || ''}</div>
+              <div className="user-name">{user?.name || 'User'}</div>
               <div className="user-role">{user?.role === 'admin' ? 'Admin (Parent)' : 'User (Family)'}</div>
             </div>
           </div>

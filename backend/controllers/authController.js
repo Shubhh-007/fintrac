@@ -18,13 +18,6 @@ const registerUser = async (req, res, next) => {
 
     // Handle admin registration
     if (role === 'admin') {
-      if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid Admin Secret"
-        });
-      }
-      
       const user = await User.create({ 
         name, 
         email, 
@@ -46,8 +39,6 @@ const registerUser = async (req, res, next) => {
         user: {
           _id: user._id,
           name: user.name,
-          firstName: user.firstName,
-          lastName: user.lastName,
           email: user.email,
           role: user.role
         }
