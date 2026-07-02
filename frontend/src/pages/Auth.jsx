@@ -19,6 +19,7 @@ function Auth() {
   const [role, setRole] = useState(searchParams.get('role') === 'admin' ? 'admin' : 'user');
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(location.pathname === '/login');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const currentMode = location.pathname === '/login' ? 'login' : location.pathname === '/signup' ? 'signup' : 'landing';
@@ -52,12 +53,13 @@ function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+ 
     if (!isLogin && password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
+ 
+    setLoading(true);
     try {
       if (isLogin) {
         await login(email, password, role);
@@ -67,6 +69,7 @@ function Auth() {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
+      setLoading(false);
     }
   };
 
@@ -206,7 +209,9 @@ function Auth() {
 
             </>
           )}
-          <button type="submit" className="auth-btn" style={{ background: role === 'admin' ? '#2563eb' : '#10b981' }}>{isLogin ? 'Sign in' : 'Create account'}</button>
+          <button type="submit" className="auth-btn" disabled={loading} style={{ background: role === 'admin' ? '#2563eb' : '#10b981' }}>
+            {loading ? 'Processing...' : (isLogin ? 'Sign in' : 'Create account')}
+          </button>
         </form>
 
         <div className="auth-switch">
