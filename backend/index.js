@@ -19,8 +19,26 @@ const startServer = async () => {
   app.use(helmet());
 
   // CORS configuration
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'https://fintrac1.netlify.app',
+  ].filter(Boolean);
+
   app.use(cors({
-    origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'https://fintrac1.netlify.app'].filter(Boolean),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      // Allow if origin is in the allowedOrigins list
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow any *.vercel.app or *.netlify.app subdomain (for preview deployments)
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin) || /^https:\/\/[a-z0-9-]+\.netlify\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true
   }));
 

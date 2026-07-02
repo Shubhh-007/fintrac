@@ -3,6 +3,9 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
+// Set base URL once at module load (gets baked into production build from .env)
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+
 const isTokenExpired = (token) => {
   if (!token) return true;
   try {
@@ -34,8 +37,6 @@ export const getDashboardUrl = (role) => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  axios.defaults.baseURL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:5000/api/v1');
 
   useEffect(() => {
     // Set up request interceptor to attach JWT token
