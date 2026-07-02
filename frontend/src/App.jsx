@@ -6,6 +6,9 @@ import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Auth from './pages/Auth';
+import VerifyOtp from './pages/VerifyOtp';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Transactions from './pages/Transactions';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
@@ -28,7 +31,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 function App() {
   const { user, loading } = useContext(AuthContext);
   const location = useLocation();
-  const publicPaths = ['/', '/auth', '/select', '/login', '/signup'];
+  const publicPaths = ['/', '/auth', '/select', '/login', '/signup', '/verify-otp', '/forgot-password', '/reset-password'];
 
   // Show loading while checking authentication
   if (loading) {
@@ -58,6 +61,9 @@ function App() {
           <Route path="/select" element={<Auth />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/signup" element={<Auth />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected User Routes */}
           <Route 

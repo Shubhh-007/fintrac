@@ -7,6 +7,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   
+  // Verification status
+  isVerified: { type: Boolean, default: false },
+  otpHash: { type: String },
+  otpExpiry: { type: Date },
+  otpAttempts: { type: Number, default: 0 },
+  otpSentAt: { type: Date },
+  
   // Family relationships
   familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Points to admin/parent
   relationship: { type: String, enum: ['admin', 'spouse', 'child'], default: 'admin' }, // Role in family
@@ -31,8 +38,12 @@ userSchema.virtual('lastName').get(function() {
   return parts.slice(1).join(' ') || '';
 });
 
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function() {
+  if (!this.isModified('password')) return;
+  // If already a bcrypt hash, do not hash it again
+  if (this.password && /^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$/.test(this.password)) {
+    return;
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

@@ -62,7 +62,8 @@ function Auth() {
       if (isLogin) {
         await login(email, password, role);
       } else {
-        await register(name, email, password, role, adminSecret, inviteCode);
+        const data = await register(name, email, password, role, adminSecret, inviteCode);
+        navigate(`/verify-otp?email=${encodeURIComponent(email)}`);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
@@ -185,7 +186,14 @@ function Auth() {
             <input type="email" required className="form-input" placeholder="arjun@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className="form-label">Password</label>
+              {isLogin && (
+                <span className="auth-link" style={{ fontSize: '12.5px', marginBottom: '6px' }} onClick={() => navigate('/forgot-password')}>
+                  Forgot password?
+                </span>
+              )}
+            </div>
             <input type="password" required className="form-input" placeholder={isLogin ? '••••••••' : 'Min. 8 characters'} value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           {!isLogin && (

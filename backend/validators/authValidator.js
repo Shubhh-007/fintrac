@@ -58,4 +58,50 @@ const loginValidator = [
   validate
 ];
 
-module.exports = { registerValidator, loginValidator };
+const verifyOtpValidator = [
+  body('email')
+    .isEmail().withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('otp')
+    .isLength({ min: 6, max: 6 }).withMessage('OTP must be exactly 6 digits')
+    .isNumeric().withMessage('OTP must contain only numbers')
+    .trim(),
+  validate
+];
+
+const resendOtpValidator = [
+  body('email')
+    .isEmail().withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  validate
+];
+
+const forgotPasswordValidator = [
+  body('email')
+    .isEmail().withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  validate
+];
+
+const resetPasswordValidator = [
+  body('email')
+    .isEmail().withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('otp')
+    .isLength({ min: 6, max: 6 }).withMessage('OTP must be exactly 6 digits')
+    .isNumeric().withMessage('OTP must contain only numbers')
+    .trim(),
+  body('password')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+    .trim(),
+  validate
+];
+
+module.exports = {
+  registerValidator,
+  loginValidator,
+  verifyOtpValidator,
+  resendOtpValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator
+};

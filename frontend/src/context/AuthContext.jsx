@@ -112,15 +112,47 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Register new user and set authentication token
-   * Note: Automatic redirect to role-based dashboard happens in App.jsx
+   * Register new user (initiates OTP flow)
+   * Note: The user account is NOT created immediately. OTP must be verified.
    */
   const register = async (name, email, password, role = 'user', adminSecret = '', inviteCode = '') => {
     const res = await axios.post('/auth/register', { name, email, password, role, adminSecret, inviteCode });
+    return res.data; // Returns { success: true, message, email }
+  };
+
+  /**
+   * Verify OTP and complete registration
+   */
+  const verifyOtp = async (email, otp) => {
+    const res = await axios.post('/auth/verify-otp', { email, otp });
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
     setUser(userData);
-    return userData; // Return user data for caller to use for redirect
+    return userData;
+  };
+
+  /**
+   * Resend verification OTP
+   */
+  const resendOtp = async (email) => {
+    const res = await axios.post('/auth/resend-otp', { email });
+    return res.data;
+  };
+
+  /**
+   * Forgot password (sends reset OTP)
+   */
+  const forgotPassword = async (email) => {
+    const res = await axios.post('/auth/forgot-password', { email });
+    return res.data;
+  };
+
+  /**
+   * Reset password using OTP
+   */
+  const resetPassword = async (email, otp, password) => {
+    const res = await axios.post('/auth/reset-password', { email, otp, password });
+    return res.data;
   };
 
   const logout = async () => {
@@ -134,7 +166,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, getDashboardUrl }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, getDashboardUrl, verifyOtp, resendOtp, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
