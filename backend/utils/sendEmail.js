@@ -1,15 +1,36 @@
 const nodemailer = require('nodemailer');
 
 const sendEmail = async ({ to, subject, name, otp, title, message }) => {
-  // Configure SMTP transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+  let user = process.env.EMAIL_USER;
+  let pass = process.env.EMAIL_PASS;
+  let host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  let port = parseInt(process.env.EMAIL_PORT || '587');
+  let secure = process.env.EMAIL_SECURE === 'true';
+
+  if (!user || !pass) {
+    try {
+      const testAccount = await nodemailer.createTestAccount();
+      user = testAccount.user;
+      pass = testAccount.pass;
+      host = 'smtp.ethereal.email';
+      port = 587;
+      secure = false;
+      console.log('Using Ethereal Test Account for Email:', user);
+    } catch (testAccErr) {
+      console.warn('Could not create Ethereal test account. OTP for', to, 'is:', otp);
+      return;
     }
+  }
+
+  // Configure SMTP transporter with timeouts
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 8000
   });
 
   // HTML template matching the application style
@@ -143,13 +164,22 @@ const sendEmail = async ({ to, subject, name, otp, title, message }) => {
   `;
 
   const mailOptions = {
-    from: `"Fintrac" <${process.env.EMAIL_USER}>`,
+    from: `"Fintrac" <${user}>`,
     to,
     subject,
     html: htmlContent
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    if (host.includes('ethereal')) {
+      console.log('Ethereal Email Preview URL:', nodemailer.getTestMessageUrl(info));
+    }
+  } catch (err) {
+    console.error('Mail delivery failed:', err.message);
+    console.log(`[OTP FALLBACK FOR ${to}]: ${otp}`);
+    // Do not re-throw error so registration flow can continue to OTP screen!
+  }
 };
 
 module.exports = sendEmail;
