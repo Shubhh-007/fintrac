@@ -405,8 +405,10 @@ const loginUser = async (req, res, next) => {
         email: user.email,
         role: user.role,
         familyId: user.familyId,
+        groupId: user.groupId,
         relationship: user.relationship,
-        status: user.status
+        status: user.status,
+        preferences: user.preferences
       }
     });
   } catch (error) {

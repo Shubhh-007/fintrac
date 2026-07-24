@@ -14,6 +14,7 @@ import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import FamilyMembers from './pages/FamilyMembers';
 import Invitations from './pages/Invitations';
+import Notifications from './pages/Notifications';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 /**
@@ -81,6 +82,10 @@ function App() {
           <Route 
             path="/profile" 
             element={<ProtectedRoute element={<Profile />} requiredRole={['user', 'admin']} />} 
+          />
+          <Route 
+            path="/notifications" 
+            element={<ProtectedRoute element={<Notifications />} requiredRole={['user', 'admin']} />} 
           />
 
           {/* Protected Admin Routes */}

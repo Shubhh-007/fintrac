@@ -63,6 +63,8 @@ const startServer = async () => {
   app.use('/api/v1/auth', require('./routes/authRoutes'));
   app.use('/api/v1/expenses', require('./routes/expenseRoutes'));
   app.use('/api/v1/users', require('./routes/userRoutes'));
+  app.use('/api/v1/groups', require('./routes/groupRoutes'));
+  app.use('/api/v1/notifications', require('./routes/notificationRoutes'));
 
   app.get('/', (req, res) => res.send('Fintrac Family Expense Tracker API running...'));
 

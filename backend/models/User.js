@@ -15,12 +15,26 @@ const userSchema = new mongoose.Schema({
   otpSentAt: { type: Date },
   
   // Family relationships
-  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Points to admin/parent
+  familyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Legacy backward compatibility
+  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }, // New standard
   relationship: { type: String, enum: ['admin', 'spouse', 'child'], default: 'admin' }, // Role in family
   status: { type: String, enum: ['active', 'pending'], default: 'active' }, // Pending = invitation sent
   familyJoinDate: { type: Date },
   invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Admin who invited this user
-  inviteCode: { type: String, unique: true, sparse: true } // Invitation code
+  inviteCode: { type: String, unique: true, sparse: true }, // Invitation code
+  
+  // Additional Profile Data
+  phone: { type: String },
+  gender: { type: String, enum: ['Male', 'Female', 'Other', 'Prefer not to say'] },
+  
+  // Preferences
+  preferences: {
+    theme: { type: String, enum: ['light', 'dark'], default: 'light' },
+    currency: { type: String, default: 'INR' },
+    language: { type: String, default: 'en' },
+    emailNotifications: { type: Boolean, default: true },
+    inAppNotifications: { type: Boolean, default: true }
+  }
 }, { 
   timestamps: true,
   toJSON: { virtuals: true },

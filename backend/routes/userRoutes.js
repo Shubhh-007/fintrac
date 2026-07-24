@@ -9,7 +9,10 @@ const {
   getPendingInvitations, 
   getInvitationDetails,
   getMyInvitation,
-  acceptInvitation
+  acceptInvitation,
+  updateProfile,
+  updatePassword,
+  deleteAccount
 } = require('../controllers/userController');
 const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware');
 
@@ -22,6 +25,11 @@ router.use(verifyToken);
 // User routes — any logged-in user
 router.get('/my-invitation', getMyInvitation);
 router.post('/accept-invitation', acceptInvitation);
+
+// Profile routes
+router.put('/profile', updateProfile);
+router.put('/password', updatePassword);
+router.delete('/account', deleteAccount);
 
 // Admin-only routes
 router.use(authorizeRoles('admin'));

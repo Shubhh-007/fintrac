@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
-import { Plus, Wallet, ArrowUpRight, ArrowDownRight, PiggyBank } from 'lucide-react';
+import { Plus, Wallet, ArrowUpRight, ArrowDownRight, PiggyBank, Users } from 'lucide-react';
 
 /**
  * Dashboard Component (User View)
@@ -21,6 +21,10 @@ function Dashboard() {
   
   const [data, setData] = useState([]);
   const [stats, setStats] = useState({ balance: 0, income: 0, expenses: 0, savingsRate: 0 });
+  const [myGroup, setMyGroup] = useState(null);
+  const [joinCode, setJoinCode] = useState('');
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState('');
   const [pieData, setPieData] = useState([]);
   const [barData, setBarData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,14 +39,44 @@ function Dashboard() {
     fetchUserData();
     // Only check for invites if user is not already in a family
     if (!user?.familyId) fetchMyInvitation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMyInvitation = async () => {
     try {
       const res = await axios.get('/users/my-invitation');
       setPendingInvite(res.data); // null if none
-    } catch (err) {
+    } catch (error) {
       // silently ignore
+    }
+  };
+
+  const fetchMyGroup = async () => {
+    try {
+      const res = await axios.get('/groups/my-group');
+      setMyGroup(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.groupId) {
+      fetchMyGroup();
+    }
+  }, [user]);
+
+  const handleJoinGroup = async (e) => {
+    e.preventDefault();
+    if (!joinCode) return;
+    setJoinLoading(true);
+    setJoinError('');
+    try {
+      await axios.post('/groups/join', { inviteCode: joinCode });
+      window.location.reload();
+    } catch (err) {
+      setJoinError(err.response?.data?.message || 'Failed to join group');
+      setJoinLoading(false);
     }
   };
 
@@ -217,6 +251,59 @@ function Dashboard() {
       {inviteMsg && (
         <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '10px', padding: '14px 18px', marginBottom: '16px', color: '#065f46', fontWeight: '600', fontSize: '14px' }}>
           🎉 {inviteMsg}
+        </div>
+      )}
+
+      {/* My Financial Group Section */}
+      {!user?.groupId && !user?.familyId && !pendingInvite && (
+        <div className="card" style={{ marginBottom: '20px', background: 'linear-gradient(to right, var(--surface), #f0f9ff)', borderColor: '#bae6fd' }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '250px' }}>
+              <div className="card-title" style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={20} color="var(--primary)" /> My Financial Group
+              </div>
+              <div className="card-sub" style={{ fontSize: '14px', lineHeight: '1.5', marginTop: '6px' }}>
+                You haven't joined a financial group yet. Joining a group allows you to track shared expenses and collaborate on family budgeting.
+              </div>
+            </div>
+            <div style={{ background: 'white', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', flex: '0 1 320px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '10px' }}>Have an invitation code?</div>
+              <form onSubmit={handleJoinGroup} style={{ display: 'flex', gap: '8px' }}>
+                <input 
+                  type="text" 
+                  placeholder="Enter Code (e.g. FAM-ABCDEF)" 
+                  className="form-input" 
+                  value={joinCode}
+                  onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                  style={{ flex: 1 }}
+                />
+                <button type="submit" className="btn btn-primary" disabled={joinLoading || !joinCode}>
+                  {joinLoading ? 'Joining...' : 'Join'}
+                </button>
+              </form>
+              {joinError && <div style={{ color: 'var(--danger)', fontSize: '12px', marginTop: '6px' }}>{joinError}</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {myGroup && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div className="card-title" style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={20} color="var(--primary)" /> {myGroup.name}
+              </div>
+              <div className="card-sub">
+                Admin: {myGroup.admin?.name} • Members: {myGroup.members?.length + 1}
+              </div>
+            </div>
+            {user.role === 'admin' ? (
+               <Link to="/admin/family" className="btn btn-primary" style={{ textDecoration: 'none' }}>Manage Group</Link>
+            ) : (
+               <span className="badge badge-green">Member</span>
+            )}
+          </div>
         </div>
       )}
 

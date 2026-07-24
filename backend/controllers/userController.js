@@ -3,6 +3,8 @@ const Expense = require('../models/Expense');
 const Invitation = require('../models/Invitation');
 const crypto = require('crypto');
 const AppError = require('../utils/AppError');
+const Notification = require('../models/Notification');
+const Group = require('../models/Group');
 
 const getAllUsers = async (req, res, next) => {
   try {
@@ -253,24 +255,139 @@ const acceptInvitation = async (req, res, next) => {
       return next(new AppError('This invitation has expired', 400));
     }
 
-    // Link the user to the admin's family
+    // Find Admin's Group
+    let group = await Group.findOne({ admin: invitation.admin._id });
+    if (!group) {
+      // Auto-create group if admin somehow doesn't have one
+      group = await Group.create({
+        name: `${invitation.admin.name}'s Family`,
+        admin: invitation.admin._id,
+        members: []
+      });
+      await User.findByIdAndUpdate(invitation.admin._id, { groupId: group._id });
+    }
+
+    // Link the user to the admin's family (legacy) and group (new)
     await User.findByIdAndUpdate(req.user._id, {
       familyId: invitation.admin._id,
+      groupId: group._id,
       invitedBy: invitation.admin._id,
       relationship: invitation.relationship,
       status: 'active',
       familyJoinDate: new Date()
     });
 
+    // Add user to Group members
+    if (!group.members.includes(req.user._id)) {
+      group.members.push(req.user._id);
+      await group.save();
+    }
+
     // Mark invitation as accepted
     invitation.status = 'accepted';
     invitation.acceptedBy = req.user._id;
     await invitation.save();
 
+    // Trigger Notification for Admin
+    await Notification.create({
+      recipient: invitation.admin._id,
+      sender: req.user._id,
+      type: 'GROUP_JOIN',
+      title: 'New Member Joined',
+      message: `${req.user.name} has accepted your invitation and joined your family.`,
+      relatedEntityId: req.user._id
+    });
+
     res.status(200).json({
       success: true,
       message: `You have joined ${invitation.admin.name}'s family as ${invitation.relationship}!`
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update Profile
+const updateProfile = async (req, res, next) => {
+  try {
+    const { name, phone, gender, preferences } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { 
+        name, 
+        phone, 
+        gender,
+        ...(preferences && { preferences })
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    // Create Notification
+    await Notification.create({
+      recipient: req.user._id,
+      type: 'PROFILE_UPDATE',
+      title: 'Profile Updated',
+      message: 'Your profile settings have been updated successfully.'
+    });
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Change Password
+const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!(await user.matchPassword(currentPassword))) {
+      return next(new AppError('Incorrect current password', 401));
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    await Notification.create({
+      recipient: req.user._id,
+      type: 'SECURITY_ALERT',
+      title: 'Password Changed',
+      message: 'Your account password was recently changed. If this was not you, please contact support immediately.'
+    });
+
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete Account
+const deleteAccount = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    // If admin, we may want to disable the group or reassign
+    if (user.role === 'admin') {
+      await Group.findOneAndUpdate({ admin: user._id }, { status: 'disabled' });
+    } else if (user.groupId) {
+      // Remove from group
+      const group = await Group.findById(user.groupId);
+      if (group) {
+        group.members = group.members.filter(m => m.toString() !== user._id.toString());
+        await group.save();
+      }
+    }
+
+    // Delete related expenses
+    await Expense.deleteMany({ user: user._id });
+
+    // Finally delete user
+    await User.findByIdAndDelete(user._id);
+
+    res.status(200).json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {
     next(error);
   }
@@ -285,5 +402,8 @@ module.exports = {
   getPendingInvitations,
   getInvitationDetails,
   getMyInvitation,
-  acceptInvitation
+  acceptInvitation,
+  updateProfile,
+  updatePassword,
+  deleteAccount
 };
