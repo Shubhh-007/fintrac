@@ -163,6 +163,37 @@ const sendEmail = async ({ to, subject, name, otp, title, message }) => {
   </html>
   `;
 
+  // If using Brevo, use their HTTP API to bypass SMTP/IP blocking completely!
+  if (host.includes('brevo') || host.includes('sendinblue')) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': pass, // Brevo SMTP pass is the same as the API key
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { email: process.env.EMAIL_FROM || user, name: "Fintrac" },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: htmlContent
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Brevo API Error: ${response.status} ${errText}`);
+      }
+      return; // Success!
+    } catch (err) {
+      console.error('Brevo API Mail delivery failed:', err.message);
+      console.log(`[OTP FALLBACK FOR ${to}]: ${otp}`);
+      return;
+    }
+  }
+
+  // Fallback for regular SMTP (Ethereal / Gmail / etc)
   const mailOptions = {
     from: `"Fintrac" <${process.env.EMAIL_FROM || user}>`,
     to,
