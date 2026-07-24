@@ -164,7 +164,7 @@ const sendEmail = async ({ to, subject, name, otp, title, message }) => {
   `;
 
   const mailOptions = {
-    from: `"Fintrac" <${user}>`,
+    from: `"Fintrac" <${process.env.EMAIL_FROM || user}>`,
     to,
     subject,
     html: htmlContent
