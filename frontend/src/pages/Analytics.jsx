@@ -58,9 +58,9 @@ function Analytics() {
           {categoryData.length === 0 && <div style={{ fontSize: '13.5px', color: 'var(--muted)' }}>No expense data available.</div>}
           {categoryData.map((c, i) => (
             <div key={c.name}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '4px' }}>
-                <span style={{color: '#000'}}>{getIcon(c.name)} {c.name}</span>
-                <span style={{ fontWeight: '500', color: '#000' }}>₹{c.amount.toLocaleString('en-IN')} · {c.pct}%</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
+                <span style={{color: 'var(--text)', fontWeight: '500'}}>{getIcon(c.name)} {c.name}</span>
+                <span style={{ fontWeight: '600', color: 'var(--text)' }}>₹{c.amount.toLocaleString('en-IN')} · {c.pct}%</span>
               </div>
               <div style={{ height: '7px', background: 'var(--bg)', borderRadius: '4px' }}>
                 <div style={{ height: '100%', width: `${c.pct}%`, background: getColor(i), borderRadius: '4px' }}></div>

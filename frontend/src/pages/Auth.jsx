@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { PiggyBank, KeyRound, UserRound, ArrowLeft } from 'lucide-react';
 
 function Auth() {
   const location = useLocation();
@@ -92,53 +93,53 @@ function Auth() {
 
   if (location.pathname === '/select') {
     return (
-      <div className="auth-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f1f5f9' }}>
-        <div className="selection-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', maxWidth: '800px', width: '100%', margin: '0 auto', padding: '2rem' }}>
-          <div className="auth-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+      <div className="auth-wrap">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', maxWidth: '800px', width: '100%', margin: '0 auto', padding: '2rem', position: 'relative', zIndex: 10 }}>
+          <div className="auth-logo">
             <div className="brand-icon">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <PiggyBank size={20} color="white" />
             </div>
-            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e293b' }}>Fintrac</span>
+            <span>Fintrac</span>
           </div>
-          <h2 style={{ fontSize: '1.8rem', color: '#0f172a', fontWeight: '800', textAlign: 'center', margin: 0 }}>Select Your Portal</h2>
-          <p style={{ color: '#64748b', textAlign: 'center', maxWidth: '500px', margin: '-1rem 0 1rem 0' }}>Choose how you want to access the Fintrac Family Expense Tracker</p>
+          <h2 style={{ fontSize: '28px', color: 'var(--text)', fontWeight: '800', textAlign: 'center', margin: 0, letterSpacing: '-0.5px' }}>Select Your Portal</h2>
+          <p style={{ color: 'var(--muted)', textAlign: 'center', maxWidth: '500px', margin: '-1rem 0 1rem 0' }}>Choose how you want to access the Fintrac Family Expense Tracker</p>
           
-          <div className="selection-cards" style={{ display: 'flex', gap: '1.5rem', width: '100%', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', width: '100%', flexWrap: 'wrap', justifyContent: 'center' }}>
             {/* Card 1: Admin */}
-            <div className="card" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '2rem', flex: '1', minWidth: '280px', maxWidth: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+            <div style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', flex: '1', minWidth: '280px', maxWidth: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: 'var(--shadow-md)', transition: 'transform 0.2s', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ background: '#eff6ff', padding: '10px', borderRadius: '10px', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    🔑
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '14px', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <KeyRound size={24} />
                   </div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Admin (Parent/Guardian)</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text)', margin: 0 }}>Admin</h3>
                 </div>
-                <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '1.5rem', minHeight: '68px' }}>Monitor family expenses, manage users and oversee financial activities.</p>
+                <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px', minHeight: '68px' }}>Monitor family expenses, manage users and oversee financial activities.</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                <button className="auth-btn" style={{ flex: 1, padding: '10px', background: '#2563eb' }} onClick={() => navigate('/login?role=admin')}>Login</button>
-                <button className="auth-btn" style={{ flex: 1, padding: '10px', background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => navigate('/signup?role=admin')}>Signup</button>
+              <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
+                <button className="btn" style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff', border: 'none' }} onClick={() => navigate('/login?role=admin')}>Login</button>
+                <button className="btn" style={{ flex: 1, padding: '12px', background: '#f8fafc', color: 'var(--text)', border: '1px solid var(--border)' }} onClick={() => navigate('/signup?role=admin')}>Signup</button>
               </div>
             </div>
 
             {/* Card 2: User */}
-            <div className="card" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '2rem', flex: '1', minWidth: '280px', maxWidth: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+            <div style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', flex: '1', minWidth: '280px', maxWidth: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: 'var(--shadow-md)', transition: 'transform 0.2s', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ background: '#ecfdf5', padding: '10px', borderRadius: '10px', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    👤
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ background: '#ecfdf5', padding: '12px', borderRadius: '14px', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <UserRound size={24} />
                   </div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>User (Child/Spouse)</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text)', margin: 0 }}>User</h3>
                 </div>
-                <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '1.5rem', minHeight: '68px' }}>Manage your own expenses and track your spending.</p>
+                <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px', minHeight: '68px' }}>Manage your own expenses and track your personal spending.</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                <button className="auth-btn" style={{ flex: 1, padding: '10px', background: '#10b981' }} onClick={() => navigate('/login?role=user')}>Login</button>
-                <button className="auth-btn" style={{ flex: 1, padding: '10px', background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => navigate('/signup?role=user')}>Signup</button>
+              <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
+                <button className="btn" style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', border: 'none' }} onClick={() => navigate('/login?role=user')}>Login</button>
+                <button className="btn" style={{ flex: 1, padding: '12px', background: '#f8fafc', color: 'var(--text)', border: '1px solid var(--border)' }} onClick={() => navigate('/signup?role=user')}>Signup</button>
               </div>
             </div>
           </div>
-          <button style={{ marginTop: '1rem', background: 'none', border: 'none', color: '#64748b', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9rem' }} onClick={() => navigate('/auth')}>Back to Home</button>
+          <button style={{ marginTop: '24px', background: 'none', border: 'none', color: 'var(--muted)', textDecoration: 'none', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600' }} onClick={() => navigate('/')}><ArrowLeft size={16} /> Back to Home</button>
         </div>
       </div>
     );
@@ -149,7 +150,7 @@ function Auth() {
       <div className="auth-card">
         <div className="auth-logo">
           <div className="brand-icon">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+             <PiggyBank size={20} color="white" />
           </div>
           <span>Fintrac</span>
         </div>
@@ -160,19 +161,23 @@ function Auth() {
           <div style={{
             background: '#ecfdf5',
             border: '1px solid #a7f3d0',
-            borderRadius: '12px',
-            padding: '12px 16px',
-            marginBottom: '16px',
-            fontSize: '13px',
+            borderRadius: '16px',
+            padding: '16px',
+            marginBottom: '24px',
+            fontSize: '14px',
             color: '#065f46',
-            lineHeight: '1.4'
+            lineHeight: '1.5',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
           }}>
-            🎉 Joining <strong>{invitationDetails.adminName}</strong>'s family as a <strong>{invitationDetails.relationship}</strong>!
+            <div style={{ background: '#d1fae5', padding: '8px', borderRadius: '10px' }}>🎉</div>
+            <div>Joining <strong>{invitationDetails.adminName}</strong>'s family as a <strong>{invitationDetails.relationship}</strong>!</div>
           </div>
         )}
 
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <span className="auth-link" style={{ fontSize: '13px' }} onClick={() => navigate('/select')}>← Choose different portal</span>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <span className="auth-link" style={{ fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }} onClick={() => navigate('/select')}><ArrowLeft size={14} /> Choose different portal</span>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
@@ -189,10 +194,10 @@ function Auth() {
             <input type="email" required className="form-input" placeholder="arjun@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label className="form-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
               {isLogin && (
-                <span className="auth-link" style={{ fontSize: '12.5px', marginBottom: '6px' }} onClick={() => navigate('/forgot-password')}>
+                <span className="auth-link" style={{ fontSize: '13px' }} onClick={() => navigate('/forgot-password')}>
                   Forgot password?
                 </span>
               )}
@@ -205,11 +210,9 @@ function Auth() {
                 <label className="form-label">Confirm Password</label>
                 <input type="password" required className="form-input" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
-
-
             </>
           )}
-          <button type="submit" className="auth-btn" disabled={loading} style={{ background: role === 'admin' ? '#2563eb' : '#10b981' }}>
+          <button type="submit" className="auth-btn" disabled={loading} style={{ background: role === 'admin' ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'linear-gradient(135deg, #10b981, #059669)' }}>
             {loading ? 'Processing...' : (isLogin ? 'Sign in' : 'Create account')}
           </button>
         </form>

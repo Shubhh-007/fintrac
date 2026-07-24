@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { Plus, Edit2, Trash2, X } from 'lucide-react';
 
 function Transactions() {
   const { user } = useContext(AuthContext);
@@ -92,7 +93,7 @@ function Transactions() {
       <div className="topbar">
         <div><div className="page-title">Expenses</div><div className="page-sub">All family records</div></div>
         <button className="btn btn-primary" onClick={handleOpenAdd}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
+          <Plus size={16} />
           Add new
         </button>
       </div>
@@ -124,8 +125,8 @@ function Transactions() {
               <span style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
                 {(user.role === 'admin' || t.user === user._id || (t.user && t.user._id === user._id)) && (
                   <>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px' }} onClick={() => handleOpenEdit(t)}>✏️</button>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px' }} onClick={() => deleteTx(t._id)}>🗑️</button>
+                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: '4px' }} onClick={() => handleOpenEdit(t)}><Edit2 size={16} /></button>
+                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', padding: '4px' }} onClick={() => deleteTx(t._id)}><Trash2 size={16} /></button>
                   </>
                 )}
               </span>
@@ -139,7 +140,7 @@ function Transactions() {
           <div style={{ background: 'var(--surface)', borderRadius: '18px', padding: '28px', width: '420px', maxWidth: '95vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div style={{ fontSize: '16px', fontWeight: '500' }}>{editingId ? 'Edit Expense' : 'Add Expense'}</div>
-              <button onClick={() => setModalOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--muted)' }}>×</button>
+              <button onClick={() => setModalOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)' }}><X size={20} /></button>
             </div>
             
             {error && <div style={{ color: 'var(--danger)', fontSize: '13px', marginBottom: '14px' }}>{error}</div>}

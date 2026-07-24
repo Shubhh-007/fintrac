@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { Copy, Link2 } from 'lucide-react';
 function Invitations() {
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,14 +111,14 @@ function Invitations() {
                   className="btn" 
                   style={{ fontSize: '12px', padding: '6px 12px' }}
                 >
-                  📋 Copy Code
+                  <Copy size={14} style={{ marginRight: '6px' }} /> Copy Code
                 </button>
                 <button 
                   onClick={() => copyToClipboard(getInviteLink(newInviteCode), 'Invite Link')} 
                   className="btn btn-primary" 
-                  style={{ fontSize: '12px', padding: '6px 12px' }}
+                  style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center' }}
                 >
-                  🔗 Copy Invite Link
+                  <Link2 size={14} style={{ marginRight: '6px' }} /> Copy Invite Link
                 </button>
               </div>
             </div>
@@ -233,17 +233,17 @@ function Invitations() {
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button 
                           onClick={() => copyToClipboard(invite.inviteCode, 'Code')} 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', padding: '2px' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--text)' }}
                           title="Copy Code"
                         >
-                          📋
+                          <Copy size={14} />
                         </button>
                         <button 
                           onClick={() => copyToClipboard(getInviteLink(invite.inviteCode), 'Link')} 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', padding: '2px' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--text)' }}
                           title="Copy Share Link"
                         >
-                          🔗
+                          <Link2 size={14} />
                         </button>
                       </div>
                     )}

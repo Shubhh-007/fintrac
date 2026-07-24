@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
+import { Plus, Wallet, ArrowUpRight, ArrowDownRight, PiggyBank } from 'lucide-react';
 
 /**
  * Dashboard Component (User View)
@@ -146,7 +147,7 @@ function Dashboard() {
         </div>
         <div className="topbar-right">
           <Link to="/transactions" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
+            <Plus size={16} />
             Add expense
           </Link>
         </div>
@@ -223,28 +224,28 @@ function Dashboard() {
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div className="stat-label">Net Balance</div>
-            <div className="stat-icon si-blue"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" strokeWidth="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+            <div className="stat-icon si-blue"><Wallet size={20} /></div>
           </div>
           <div className="stat-value">{formatCurrency(stats.balance)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div className="stat-label">Total Income</div>
-            <div className="stat-icon si-green"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#10b981" strokeWidth="2"><path d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg></div>
+            <div className="stat-icon si-green"><ArrowUpRight size={20} /></div>
           </div>
           <div className="stat-value" style={{ color: 'var(--success)' }}>{formatCurrency(stats.income)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div className="stat-label">Total Expenses</div>
-            <div className="stat-icon si-red"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ef4444" strokeWidth="2"><path d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg></div>
+            <div className="stat-icon si-red"><ArrowDownRight size={20} /></div>
           </div>
           <div className="stat-value" style={{ color: 'var(--danger)' }}>{formatCurrency(stats.expenses)}</div>
         </div>
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div className="stat-label">Savings Rate</div>
-            <div className="stat-icon si-amber"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" strokeWidth="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
+            <div className="stat-icon si-amber"><PiggyBank size={20} /></div>
           </div>
           <div className="stat-value">{stats.savingsRate}%</div>
         </div>

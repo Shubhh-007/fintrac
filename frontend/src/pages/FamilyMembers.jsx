@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { X, Edit2, Trash2 } from 'lucide-react';
 
 function FamilyMembers() {
   const { user: currentUser } = useContext(AuthContext);
@@ -252,9 +253,9 @@ function FamilyMembers() {
               </div>
               <button 
                 onClick={handleCloseModal} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px', color: 'var(--muted)' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}
               >
-                &times;
+                <X size={24} />
               </button>
             </div>
 
@@ -374,17 +375,17 @@ function FamilyMembers() {
                           <div style={{ display: 'flex', gap: '6px' }}>
                             <button 
                               onClick={() => handleEditClick(exp)} 
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: '4px' }}
                               title="Edit Expense"
                             >
-                              ✏️
+                              <Edit2 size={16} />
                             </button>
                             <button 
                               onClick={() => handleDeleteExpense(exp._id)} 
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', padding: '4px' }}
                               title="Delete Expense"
                             >
-                              🗑️
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </div>

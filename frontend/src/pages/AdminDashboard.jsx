@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { UserPlus, X, Edit2, Trash2 } from 'lucide-react';
 
 /**
  * Admin Dashboard Component (Parent/Guardian View)
@@ -221,7 +222,7 @@ function AdminDashboard() {
           <div className="page-sub">Monitor your family's spending and manage members from one place.</div>
         </div>
         <Link to="/admin/invitations" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
+          <UserPlus size={16} />
           Invite Member
         </Link>
       </div>
@@ -477,9 +478,9 @@ function AdminDashboard() {
               </div>
               <button 
                 onClick={handleCloseModal} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px', color: 'var(--muted)' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}
               >
-                &times;
+                <X size={24} />
               </button>
             </div>
 
@@ -599,17 +600,17 @@ function AdminDashboard() {
                           <div style={{ display: 'flex', gap: '6px' }}>
                             <button 
                               onClick={() => handleEditClick(exp)} 
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: '4px' }}
                               title="Edit Expense"
                             >
-                              ✏️
+                              <Edit2 size={16} />
                             </button>
                             <button 
                               onClick={() => handleDeleteExpense(exp._id)} 
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', padding: '4px' }}
                               title="Delete Expense"
                             >
-                              🗑️
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </div>

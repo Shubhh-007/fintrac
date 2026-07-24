@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { PiggyBank, ArrowLeft } from 'lucide-react';
 
 function ForgotPassword() {
   const navigate = useNavigate();
@@ -29,9 +30,7 @@ function ForgotPassword() {
       <div className="auth-card">
         <div className="auth-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/select')}>
           <div className="brand-icon">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <PiggyBank size={20} color="white" />
           </div>
           <span>Fintrac</span>
         </div>
@@ -58,7 +57,7 @@ function ForgotPassword() {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <span className="auth-link" style={{ fontSize: '13px' }} onClick={() => navigate('/login')}>← Back to Login</span>
+          <span className="auth-link" style={{ fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }} onClick={() => navigate('/login')}><ArrowLeft size={14} /> Back to Login</span>
         </div>
       </div>
     </div>

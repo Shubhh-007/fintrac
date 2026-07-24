@@ -15,6 +15,9 @@ const startServer = async () => {
   
   const app = express();
 
+  // Trust proxy for Render/Netlify
+  app.set('trust proxy', 1);
+
   // Security Headers
   app.use(helmet());
 

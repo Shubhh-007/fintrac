@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { LogOut } from 'lucide-react';
 
 function Profile() {
   const { user, logout } = useContext(AuthContext);
@@ -8,7 +9,7 @@ function Profile() {
     <div className="screen">
       <div className="topbar">
         <div><div className="page-title">Profile</div><div className="page-sub">Manage your account</div></div>
-        <button className="btn btn-primary" onClick={logout}>Sign Out</button>
+        <button className="btn btn-primary" onClick={logout}><LogOut size={16} /> Sign Out</button>
       </div>
       <div className="profile-header">
         <div className="profile-avatar">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</div>
